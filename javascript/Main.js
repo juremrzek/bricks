@@ -31,31 +31,25 @@ function mainLoop(){
         }
         ball.x += ball.vx;
         ball.y += ball.vy;
-        ball.vx *= 1 - friction;
-        ball.vy *= 1 - friction;
-        if(ball.vx < 0.05 && ball.vx > -0.05) //so the numbers dont become extremely small
-            ball.vx = 0;
-        if(ball.vy < 0.05 && ball.vy > -0.05)
-            ball.vy = 0;
 
         if(ball.x<=ball.r || ball.x>=canvas.width-ball.r)
             ball.vx = -ball.vx;
         if(ball.y<=ball.r || ball.y>=canvas.height-ball.r)
             ball.vy = -ball.vy;
+        
         /* */
         for(let i=0; i<balls.length; i++){
             if(ball.id == i)
                 break;
-            let distance = ball.distanceFromPoint(balls[i].x, balls[i].y);
-            if(distance <= ball.r+balls[i].r){ //check collision between two balls
-                let overlap = 0.5*(distance - ball.r - balls[i].r);
-                ball.x -= overlap * (ball.x - balls[i].x)/distance; //razstavimo dejanski razmak krogov v x in y koordinato -
-                ball.y -= overlap * (ball.y - balls[i].y)/distance; //če bo x=0.2 bo y=0.8, skupaj bo vedno 1. Potem pomnožimo z
-                balls[i].x += overlap * (ball.x - balls[i].x)/distance; //razdaljo, za katero hočemo premakniti ball
-                balls[i].y += overlap * (ball.y - balls[i].y)/distance;
+            if(ball.distanceFromPoint(balls[i].x, balls[i].y) <= ball.r+balls[i].r){ //check collision between two balls
+                let overlap = 0.5*(ball.distanceFromPoint(balls[i].x, balls[i].y) - ball.r - balls[i].r);
+                ball.x -= overlap * (ball.x - balls[i].x)/ball.distanceFromPoint(balls[i].x, balls[i].y); //razstavimo dejanski razmak krogov v x in y koordinato -
+                ball.y -= overlap * (ball.y - balls[i].y)/ball.distanceFromPoint(balls[i].x, balls[i].y); //če bo x=0.2 bo y=0.8, skupaj bo vedno 1. Potem pomnožimo z
+                balls[i].x += overlap * (ball.x - balls[i].x)/ball.distanceFromPoint(balls[i].x, balls[i].y); //razdaljo, za katero hočemo premakniti ball
+                balls[i].y += overlap * (ball.y - balls[i].y)/ball.distanceFromPoint(balls[i].x, balls[i].y);
 
-                let xnormal = (ball.x - balls[i].x)/distance; //vektor normale - ta gleda proti središču collided kroga
-                let ynormal = (ball.y - balls[i].y)/distance;
+                let xnormal = (ball.x - balls[i].x)/ball.distanceFromPoint(balls[i].x, balls[i].y); //vektor normale - ta gleda proti središču collided kroga
+                let ynormal = (ball.y - balls[i].y)/ball.distanceFromPoint(balls[i].x, balls[i].y);
                 
                 let xtangent = -ynormal;
                 let ytangent = xnormal;
@@ -67,9 +61,9 @@ function mainLoop(){
 
                 //računanje momentuma - enačbe pridobljene iz wikipedije: https://en.wikipedia.org/wiki/Elastic_collision
                 let v1 = (ball.mass - balls[i].mass)/(ball.mass + balls[i].mass)*skalarNorm1
-                +(2*balls[i].mass*skalarNorm2)/(ball.mass + balls[i].mass);
-                let v2 = (ball.mass - balls[i].mass)/(ball.mass + balls[i].mass)*skalarNorm2
-                +(2*balls[i].mass*skalarNorm1)/(ball.mass + balls[i].mass);
+                +(2*balls[i].mass)/(ball.mass + balls[i].mass)*skalarNorm2;
+                let v2 = (2*ball.mass)/(ball.mass+balls[i].mass)*skalarNorm1
+                +(balls[i].mass-ball.mass)/(ball.mass+balls[i].mass)*skalarNorm2;
 
                 ball.vx = skalarTang1 * xtangent + xnormal * v1; //naša hitrost je skalarni produkt med novima vektorjema
                 ball.vy = skalarTang1 * ytangent + ynormal * v1;
@@ -118,8 +112,8 @@ canvas.addEventListener("mouseup", (event) => {
     mouseDown = false;
     balls.forEach((ball) => {
         if(ball.selected){
-            ball.vx = (mouse.x - ball.x)/50;
-            ball.vy = (mouse.y - ball.y)/50;
+            ball.vx = (ball.x - mouse.x)/50;
+            ball.vy = (ball.y - mouse.y)/50;
         }
         ball.selected = false;
     });

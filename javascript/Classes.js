@@ -32,7 +32,7 @@ class Ball{
         this.vy = vy;
         this.id = id;
         this.selected = false;
-        this.mass = radius*2;
+        this.mass = radius*10;
     }
     draw(color){
         ctx.strokeStyle = color;
