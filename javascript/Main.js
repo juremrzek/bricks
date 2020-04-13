@@ -2,40 +2,88 @@ const canvas = document.getElementById("canvas");
 canvas.width = 1200;
 canvas.height = 800;
 const ctx = canvas.getContext("2d");
+const friction = 0.002; //from 0 to 1 - 
 let paddle = new Paddle(450,canvas.height-64,256,48,6);
-let ball = new Ball(400, 150, 20, 4, 4);
+let balls = [];
+let numberOfBalls = 2;
+let mouse = new Point(0,0);
+let mouseDown = false;
+balls.push(new Ball(400, 150, 60, 0, 0, 0));
+balls.push(new Ball(800, 300, 20, 0, 0, 1));
+balls.push(new Ball(200, 500, 80, 0, 0, 2));
+balls.push(new Ball(120, 700, 30, 0, 0, 3));
+balls.push(new Ball(130, 400, 40, 0, 0, 4));
+balls.push(new Ball(530, 300, 45, 0, 0, 5));
+balls.push(new Ball(780, 200, 55, 0, 0, 6));
+balls.push(new Ball(820, 600, 70, 0, 0, 7));
 mainLoop();
 function mainLoop(){
-    //ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ball.x += ball.xspeed;
-    ball.y += ball.yspeed;
-    if(ball.x<ball.r || ball.x>canvas.width-ball.r)
-        ball.xspeed = -ball.xspeed;
-    if(ball.y<ball.r || ball.y>canvas.height-ball.r)
-        ball.yspeed = -ball.yspeed;
-    if(ball.distanceFrom(paddle.x, paddle.y, paddle.width, paddle.height) < ball.r){
-        if(ball.x<paddle.x-paddle.width/2){
-            ball.xspeed = -ball.xspeed;
-            ball.x-=ball.r;
-        } 
-        else if(ball.x>paddle.x+paddle.width/2){
-            ball.xspeed = -ball.xspeed;
-            ball.x+=ball.r;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    balls.forEach((ball) => {
+        if(mouseDown){
+            if(ball.selected){
+                ctx.beginPath();
+                ctx.strokeStyle = "blue";
+                ctx.moveTo(ball.x, ball.y);
+                ctx.lineTo(mouse.x, mouse.y);
+                ctx.stroke();
+            }
         }
-        else
-            ball.yspeed = -ball.yspeed;
-    }
-    if(paddle.right && paddle.x-paddle.width/2 > 0 && paddle.x+paddle.width/2 < canvas.width)
-        paddle.x += paddle.speed;
-    if(paddle.left && paddle.x-paddle.width/2 > 0 && paddle.x+paddle.width/2 < canvas.width)
-        paddle.x -= paddle.speed;
-    if(paddle.x-paddle.width/2 <= 0)
-        paddle.x+=2;
-    if(paddle.x+paddle.width/2 >= canvas.width)
-        paddle.x-=2;
-    paddle.drawImg("img/paddle.png");
+        ball.x += ball.vx;
+        ball.y += ball.vy;
+        ball.vx *= 1 - friction;
+        ball.vy *= 1 - friction;
+        if(ball.vx < 0.05 && ball.vx > -0.05) //so the numbers dont become extremely small
+            ball.vx = 0;
+        if(ball.vy < 0.05 && ball.vy > -0.05)
+            ball.vy = 0;
+
+        if(ball.x<=ball.r || ball.x>=canvas.width-ball.r)
+            ball.vx = -ball.vx;
+        if(ball.y<=ball.r || ball.y>=canvas.height-ball.r)
+            ball.vy = -ball.vy;
+        /* */
+        for(let i=0; i<balls.length; i++){
+            if(ball.id == i)
+                break;
+            let distance = ball.distanceFromPoint(balls[i].x, balls[i].y);
+            if(distance <= ball.r+balls[i].r){ //check collision between two balls
+                let overlap = 0.5*(distance - ball.r - balls[i].r);
+                ball.x -= overlap * (ball.x - balls[i].x)/distance; //razstavimo dejanski razmak krogov v x in y koordinato -
+                ball.y -= overlap * (ball.y - balls[i].y)/distance; //če bo x=0.2 bo y=0.8, skupaj bo vedno 1. Potem pomnožimo z
+                balls[i].x += overlap * (ball.x - balls[i].x)/distance; //razdaljo, za katero hočemo premakniti ball
+                balls[i].y += overlap * (ball.y - balls[i].y)/distance;
+
+                let xnormal = (ball.x - balls[i].x)/distance; //vektor normale - ta gleda proti središču collided kroga
+                let ynormal = (ball.y - balls[i].y)/distance;
+                
+                let xtangent = -ynormal;
+                let ytangent = xnormal;
+
+                let skalarTang1 = xtangent*ball.vx + ytangent*ball.vy; //skalarni produkt tangente in hitrosti žoge
+                let skalarTang2 = xtangent*balls[i].vx + ytangent*balls[i].vy;
+                let skalarNorm1 = xnormal*ball.vx + ynormal*ball.vy; //skalarni produkt normale in hitrosti žoge
+                let skalarNorm2 = xnormal*balls[i].vx + ynormal*balls[i].vy;
+
+                //računanje momentuma - enačbe pridobljene iz wikipedije: https://en.wikipedia.org/wiki/Elastic_collision
+                let v1 = (ball.mass - balls[i].mass)/(ball.mass + balls[i].mass)*skalarNorm1
+                +(2*balls[i].mass*skalarNorm2)/(ball.mass + balls[i].mass);
+                let v2 = (ball.mass - balls[i].mass)/(ball.mass + balls[i].mass)*skalarNorm2
+                +(2*balls[i].mass*skalarNorm1)/(ball.mass + balls[i].mass);
+
+                ball.vx = skalarTang1 * xtangent + xnormal * v1; //naša hitrost je skalarni produkt med novima vektorjema
+                ball.vy = skalarTang1 * ytangent + ynormal * v1;
+                balls[i].vx = skalarTang2 * xtangent + xnormal * v2;
+                balls[i].vy = skalarTang2 * ytangent + ynormal * v2;
+            }
+        }
+    });
+    //paddle.drawImg("img/paddle.png");
     //paddle.draw("black");
-    ball.draw("#fdad30");
+    for(let i=0; i<balls.length; i++){
+        //balls[i].draw("#fdad30");
+        balls[i].draw("blue");
+    }
     requestAnimationFrame(mainLoop);
 }
 
@@ -52,4 +100,27 @@ window.addEventListener("keyup", (event) => {
         paddle.right = false;
     if(key == 65 || key == 37)
         paddle.left = false;
+});
+canvas.addEventListener("mousemove", (event) => {
+    mouse.x = event.x-canvas.getBoundingClientRect().left;
+    mouse.y = event.y-canvas.getBoundingClientRect().top;
+});
+canvas.addEventListener("mousedown", (event) => {
+    mouse.x = event.x-canvas.getBoundingClientRect().left;
+    mouse.y = event.y-canvas.getBoundingClientRect().top;
+    mouseDown = true;
+    balls.forEach((ball) => {
+        if(ball.distanceFromPoint(mouse.x, mouse.y) < ball.r)
+            ball.selected = true;
+    });
+});
+canvas.addEventListener("mouseup", (event) => {
+    mouseDown = false;
+    balls.forEach((ball) => {
+        if(ball.selected){
+            ball.vx = (mouse.x - ball.x)/50;
+            ball.vy = (mouse.y - ball.y)/50;
+        }
+        ball.selected = false;
+    });
 });
