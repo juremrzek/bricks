@@ -49,6 +49,31 @@ class Ball{
         //console.log(x+ " lčmao "+this.x);
         return Math.sqrt((this.x-x)*(this.x-x) + (this.y-y)*(this.y-y));
     }
+    dynamicCollision(ball, moveOtherBall){
+        let xnormal = (this.x - ball.x)/this.distanceFromPoint(ball.x, ball.y); //vektor normale - ta gleda proti središču collided kroga
+        let ynormal = (this.y - ball.y)/this.distanceFromPoint(ball.x, ball.y);
+        let xtangent = -ynormal;
+        let ytangent = xnormal;
+
+        let skalarTang1 = xtangent*this.vx + ytangent*this.vy; //skalarni produkt tangente in hitrosti žoge
+        let skalarTang2 = xtangent*ball.vx + ytangent*ball.vy;
+        let skalarNorm1 = xnormal*this.vx + ynormal*this.vy; //skalarni produkt normale in hitrosti žoge
+        let skalarNorm2 = xnormal*ball.vx + ynormal*ball.vy;
+
+        //računanje momentuma - enačbe pridobljene iz wikipedije: https://en.wikipedia.org/wiki/Elastic_collision
+        let v1 = (this.mass - ball.mass)/(this.mass + ball.mass)*skalarNorm1
+        +(2*ball.mass)/(this.mass + ball.mass)*skalarNorm2;
+        let v2 = (2*this.mass)/(this.mass+ball.mass)*skalarNorm1
+        +(ball.mass-this.mass)/(this.mass+ball.mass)*skalarNorm2;
+
+        this.vx = skalarTang1 * xtangent + xnormal * v1; //naša hitrost je skalarni produkt novih vektorjev
+        this.vy = skalarTang1 * ytangent + ynormal * v1;
+
+        if(moveOtherBall){
+            ball.vx = skalarTang2 * xtangent + xnormal * v2;
+            ball.vy = skalarTang2 * ytangent + ynormal * v2;
+        }
+    }
 }
 class Point{
     constructor(x, y){

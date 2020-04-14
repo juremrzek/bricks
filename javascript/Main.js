@@ -5,18 +5,9 @@ const ctx = canvas.getContext("2d");
 let paddle = new Paddle(450,canvas.height-64,256,48,6);
 let balls = [];
 let walls = [];
-let numberOfBalls = 30;
+let numberOfBalls = 10;
 let mouse = new Point(0,0);
 let mouseDown = false;
-/*balls.push(new Ball(400, 150, 60, 0, 0, 0));
-balls.push(new Ball(800, 300, 20, 0, 0, 1));
-balls.push(new Ball(200, 500, 80, 0, 0, 2));
-balls.push(new Ball(120, 700, 30, 0, 0, 3));
-balls.push(new Ball(130, 400, 40, 0, 0, 4));
-balls.push(new Ball(530, 300, 45, 0, 0, 5));
-balls.push(new Ball(780, 200, 55, 0, 0, 6));
-balls.push(new Ball(820, 600, 70, 0, 0, 7));
-balls.push(new Ball(220, 300, 70, 0, 0, 7));*/
 
 let id = 0;
 for(let i=0; i<numberOfBalls; i++){
@@ -26,9 +17,14 @@ for(let i=0; i<numberOfBalls; i++){
     balls.push(new Ball(x,y,r,0,0,id));
     id++;
 }
-
-walls.push(new Wall(200, 650, 400, 700, 30));
-walls.push(new Wall(100, 450, 400, 500, 20));
+walls.push(new Wall(400, 200, 600, 200, 30));
+walls.push(new Wall(400, 700, 600, 700, 30));
+walls.push(new Wall(-20, -20, -20, canvas.height+20, 20));
+walls.push(new Wall(-20, canvas.height+20, canvas.width+20, canvas.height+20, 20));
+walls.push(new Wall(canvas.width+20, canvas.height+20, canvas.width+20, -20, 20));
+walls.push(new Wall(canvas.width+20, -20, -20, -20, 20));
+//walls.push(new Wall(0, 0, canvas.width, canvas.height, 20));
+//walls.push(new Wall(0, 0, 0, canvas.height, 20));
 mainLoop();
 function mainLoop(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -56,12 +52,6 @@ function mainLoop(){
         }
         ball.x += ball.vx;
         ball.y += ball.vy;
-
-        if(ball.x<=ball.r || ball.x>=canvas.width-ball.r)
-            ball.vx = -ball.vx;
-        if(ball.y<=ball.r || ball.y>=canvas.height-ball.r)
-            ball.vy = -ball.vy;
-        
         
         //Collision
         for(let i=0; i<balls.length; i++){
@@ -77,30 +67,8 @@ function mainLoop(){
                 distance = ball.distanceFromPoint(balls[i].x, balls[i].y);
                 balls[i].x += overlap * (ball.x - balls[i].x)/distance; 
                 balls[i].y += overlap * (ball.y - balls[i].y)/distance;
-
-
-                distance = ball.distanceFromPoint(balls[i].x, balls[i].y);
-                let xnormal = (ball.x - balls[i].x)/ball.distanceFromPoint(balls[i].x, balls[i].y); //vektor normale - ta gleda proti središču collided kroga
-                let ynormal = (ball.y - balls[i].y)/ball.distanceFromPoint(balls[i].x, balls[i].y);
                 
-                let xtangent = -ynormal;
-                let ytangent = xnormal;
-
-                let skalarTang1 = xtangent*ball.vx + ytangent*ball.vy; //skalarni produkt tangente in hitrosti žoge
-                let skalarTang2 = xtangent*balls[i].vx + ytangent*balls[i].vy;
-                let skalarNorm1 = xnormal*ball.vx + ynormal*ball.vy; //skalarni produkt normale in hitrosti žoge
-                let skalarNorm2 = xnormal*balls[i].vx + ynormal*balls[i].vy;
-
-                //računanje momentuma - enačbe pridobljene iz wikipedije: https://en.wikipedia.org/wiki/Elastic_collision
-                let v1 = (ball.mass - balls[i].mass)/(ball.mass + balls[i].mass)*skalarNorm1
-                +(2*balls[i].mass)/(ball.mass + balls[i].mass)*skalarNorm2;
-                let v2 = (2*ball.mass)/(ball.mass+balls[i].mass)*skalarNorm1
-                +(balls[i].mass-ball.mass)/(ball.mass+balls[i].mass)*skalarNorm2;
-
-                ball.vx = skalarTang1 * xtangent + xnormal * v1; //naša hitrost je skalarni produkt novih vektorjev
-                ball.vy = skalarTang1 * ytangent + ynormal * v1;
-                balls[i].vx = skalarTang2 * xtangent + xnormal * v2;
-                balls[i].vy = skalarTang2 * ytangent + ynormal * v2;
+                ball.dynamicCollision(balls[i], true);
 
             }
         }
@@ -118,9 +86,12 @@ function mainLoop(){
             
             if(distance <= ball.r+wall.r){
                 let tempBall = new Ball(closestPoint.x, closestPoint.y, wall.r, -ball.vx, -ball.vy, null);
+                tempBall.mass = ball.mass;
                 let overlap = (distance-ball.r-tempBall.r);
                 ball.x -= overlap*(ball.x-tempBall.x)/distance;
                 ball.y -= overlap*(ball.y-tempBall.y)/distance;
+
+                ball.dynamicCollision(tempBall, false);
             }
         });
     });
