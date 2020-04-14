@@ -5,7 +5,7 @@ const ctx = canvas.getContext("2d");
 let paddle = new Paddle(450,canvas.height-64,256,48,6);
 let balls = [];
 let walls = [];
-let numberOfBalls = 10;
+let numberOfBalls = 100;
 let mouse = new Point(0,0);
 let mouseDown = false;
 
@@ -13,18 +13,16 @@ let id = 0;
 for(let i=0; i<numberOfBalls; i++){
     let x = Math.trunc(Math.random()*canvas.width);
     let y = Math.trunc(Math.random()*canvas.height);
-    let r = Math.trunc(Math.random()*80+10);
+    let r = Math.trunc(Math.random()*30+5);
     balls.push(new Ball(x,y,r,0,0,id));
     id++;
 }
-walls.push(new Wall(400, 200, 600, 200, 30));
+//walls.push(new Wall(400, 200, 600, 200, 30));
 walls.push(new Wall(400, 700, 600, 700, 30));
 walls.push(new Wall(-20, -20, -20, canvas.height+20, 20));
 walls.push(new Wall(-20, canvas.height+20, canvas.width+20, canvas.height+20, 20));
 walls.push(new Wall(canvas.width+20, canvas.height+20, canvas.width+20, -20, 20));
 walls.push(new Wall(canvas.width+20, -20, -20, -20, 20));
-//walls.push(new Wall(0, 0, canvas.width, canvas.height, 20));
-//walls.push(new Wall(0, 0, 0, canvas.height, 20));
 mainLoop();
 function mainLoop(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -50,6 +48,10 @@ function mainLoop(){
             ctx.lineTo(mouse.x, mouse.y);
             ctx.stroke();
         }
+        ball.vx *= 0.999;
+        ball.vy *= 0.999;
+        ball.vy += 0.03;
+        
         ball.x += ball.vx;
         ball.y += ball.vy;
         
