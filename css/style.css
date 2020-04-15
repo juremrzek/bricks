@@ -2,13 +2,16 @@
     margin: 0;
 }
 html{
-    background: #fdcb7e;
+    /*background: #fdcb7e;*/
+    background: black;
 }
 #canvas{
     width: 1200px;
     height: 800px;
-    background: #fed8b1;
+    /*background: #fed8b1;*/
+    background: black;
     position: relative;
     left: 50%;
     transform: translate(-50%, 0);
+    border: 1px solid white;
 }

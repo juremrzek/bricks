@@ -2,23 +2,30 @@ const canvas = document.getElementById("canvas");
 canvas.width = 1200;
 canvas.height = 800;
 const ctx = canvas.getContext("2d");
-let paddle = new Paddle(450,canvas.height-64,256,48,6);
 let balls = [];
 let walls = [];
-let numberOfBalls = 100;
+let numberOfBalls = 4;
 let mouse = new Point(0,0);
 let mouseDown = false;
-
-let id = 0;
-for(let i=0; i<numberOfBalls; i++){
+let paddle = new Paddle(canvas.width/2-100, 750, canvas.width/2+100, 750, 20, 5);
+balls.push(new Ball(canvas.width/2, 695, 30, 0, 0, 0));
+let id = 1;
+/*for(let i=0; i<numberOfBalls; i++){
     let x = Math.trunc(Math.random()*canvas.width);
     let y = Math.trunc(Math.random()*canvas.height);
     let r = Math.trunc(Math.random()*30+5);
     balls.push(new Ball(x,y,r,0,0,id));
     id++;
+}*/
+for(let i=0; i<numberOfBalls; i++){
+    let x = i*420+180;
+    let y = 120;
+    let r = 50;
+    balls.push(new Ball(x,y,r,0,0,id));
+    id++;
 }
 //walls.push(new Wall(400, 200, 600, 200, 30));
-walls.push(new Wall(400, 700, 600, 700, 30));
+walls.push(paddle.wall);
 walls.push(new Wall(-20, -20, -20, canvas.height+20, 20));
 walls.push(new Wall(-20, canvas.height+20, canvas.width+20, canvas.height+20, 20));
 walls.push(new Wall(canvas.width+20, canvas.height+20, canvas.width+20, -20, 20));
@@ -27,7 +34,7 @@ mainLoop();
 function mainLoop(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    //Drag walls
+    /*//Drag walls
     walls.forEach((wall) => {
         if(wall.startSelected){
             wall.startx = mouse.x;
@@ -37,20 +44,22 @@ function mainLoop(){
             wall.endx = mouse.x;
             wall.endy = mouse.y;
         }
-    });
+    })*/
+
+    if(paddle.right){
+        paddle.startx +=paddle.speed;
+        paddle.endx += paddle.speed;
+    }
+    if(paddle.left){
+        paddle.startx -=paddle.speed;
+        paddle.endx -= paddle.speed;
+    }
+    paddle.update();
 
     balls.forEach((ball) => {
-        //Drag balls
-        if(ball.selected){
-            ctx.beginPath();
-            ctx.strokeStyle = "blue";
-            ctx.moveTo(ball.x, ball.y);
-            ctx.lineTo(mouse.x, mouse.y);
-            ctx.stroke();
-        }
-        ball.vx *= 0.999;
-        ball.vy *= 0.999;
-        ball.vy += 0.03;
+        //ball.vx *= 0.995; //friction
+        //ball.vy *= 0.995;
+        //ball.vy += 0.01; //gravity
         
         ball.x += ball.vx;
         ball.y += ball.vy;
@@ -71,7 +80,6 @@ function mainLoop(){
                 balls[i].y += overlap * (ball.y - balls[i].y)/distance;
                 
                 ball.dynamicCollision(balls[i], true);
-
             }
         }
         //collision med zidovi in krogi
@@ -87,6 +95,7 @@ function mainLoop(){
             let distance = distanceBetweenPoints(ball.x, ball.y, closestPoint.x, closestPoint.y);
             
             if(distance <= ball.r+wall.r){
+                //ustarimo navidezno žogo, ki bo odbil žogo proč od zida 
                 let tempBall = new Ball(closestPoint.x, closestPoint.y, wall.r, -ball.vx, -ball.vy, null);
                 tempBall.mass = ball.mass;
                 let overlap = (distance-ball.r-tempBall.r);
@@ -97,14 +106,19 @@ function mainLoop(){
             }
         });
     });
-    //paddle.drawImg("img/paddle.png");
-    //paddle.draw("black");
-    for(let i=0; i<balls.length; i++){
-        //balls[i].draw("#fdad30");
-        balls[i].draw("blue");
-    }
     for(let i=0; i<walls.length; i++){
-        walls[i].draw("black", "black");
+        walls[i].draw("white", "white");
+    }
+    for(let i=0; i<balls.length; i++){
+        balls[i].draw("blue");
+        //line to shoot the balls
+        if(balls[i].selected){
+            ctx.beginPath();
+            ctx.strokeStyle = "white";
+            ctx.moveTo(balls[i].x, balls[i].y);
+            ctx.lineTo(mouse.x, mouse.y);
+            ctx.stroke();
+        }
     }
     requestAnimationFrame(mainLoop);
 }
@@ -123,11 +137,11 @@ window.addEventListener("keyup", (event) => {
     if(key == 65 || key == 37)
         paddle.left = false;
 });
-canvas.addEventListener("mousemove", (event) => {
+window.addEventListener("mousemove", (event) => {
     mouse.x = event.x-canvas.getBoundingClientRect().left;
     mouse.y = event.y-canvas.getBoundingClientRect().top;
 });
-canvas.addEventListener("mousedown", (event) => {
+window.addEventListener("mousedown", (event) => {
     mouse.x = event.x-canvas.getBoundingClientRect().left;
     mouse.y = event.y-canvas.getBoundingClientRect().top;
     mouseDown = true;
@@ -142,7 +156,7 @@ canvas.addEventListener("mousedown", (event) => {
             wall.endSelected = true;
     });
 });
-canvas.addEventListener("mouseup", (event) => {
+window.addEventListener("mouseup", (event) => {
     mouseDown = false;
     balls.forEach((ball) => {
         if(ball.selected){

@@ -1,26 +1,33 @@
 class Paddle{
-    constructor(x, y, width, height, speed){
-        this.x = x+width/2;
-        this.y = y+height/2;
-        this.width = width;
-        this.height = height;
+    constructor(startx, starty, endx, endy, radius, speed){
+        this.startx = startx;
+        this.starty = starty;
+        this.endx = endx;
+        this.endy = endy;
+        this.r = radius;
+        this.wall = new Wall(startx, starty, endx, endy, radius);
+        this.speed = speed;
         this.left = false;
         this.right = false;
-        this.speed = speed;
     }
-    drawImg(src){
-        let paddleImg = new Image();
-        paddleImg.src = src;
-        paddleImg.onload = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(paddleImg, this.x-this.width/2, this.y-this.height/2, this.width, this.height);
+    update(){
+        if(this.startx <= this.r){
+            let overlap = -this.startx+this.r;
+            this.startx += overlap;
+            this.endx += overlap;
         }
+        if(this.endx >= canvas.width-this.r){
+            let overlap = this.endx-canvas.width+this.r;
+            this.startx -= overlap;
+            this.endx -= overlap;
+        }
+        this.wall.startx = this.startx;
+        this.wall.starty = this.starty;
+        this.wall.endx = this.endx;
+        this.wall.endy = this.endy;
     }
-    draw(color){
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.rect(this.x-this.width/2, this.y-this.height/2, this.width, this.height);
-        ctx.fill();
+    draw(color1, color2){
+        this.wall.draw(color1, color2);
     }
 }
 class Ball{
@@ -33,12 +40,13 @@ class Ball{
         this.id = id;
         this.selected = false;
         this.mass = radius*10;
+        this.numberOfBounces = 0;
     }
     draw(color){
-        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI);
-        ctx.stroke();
+        ctx.fill();
     }
     /*distanceFromRectangle(x, y, width, height){ //distance from ball and a rectangle
         let dx = Math.max(Math.abs(this.x - x) - width / 2, 0);
@@ -73,6 +81,8 @@ class Ball{
             ball.vx = skalarTang2 * xtangent + xnormal * v2;
             ball.vy = skalarTang2 * ytangent + ynormal * v2;
         }
+        this.numberOfBounces++;
+        console.log(this.numberOfBounces);
     }
 }
 class Point{
