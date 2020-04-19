@@ -39,17 +39,29 @@ class Ball{
         this.vy = vy;
         this.id = id;
         this.selected = false;
-        this.mass = radius*10;
+        this.mass = radius*1000;
         this.type;
         this.active = true; //if the ball is still in game, status = "active"
-        this.ax = 0;
-        this.ay = 0;
+        this.img = new Image();
+
     }
     draw(color){
         ctx.fillStyle = color;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI);
         ctx.fill();
+    }
+    drawImg(){
+        //this.img.onload = ()=> {
+            ctx.drawImage(this.img, this.x-this.r, this.y-this.r, this.r*2, this.r*2);
+        //}
+    }
+    loadImg(imgsrc){
+        this.imgsrc = imgsrc;
+        this.img.src = this.imgsrc;
+        this.img.onload = ()=> {
+            ctx.drawImage(this.img, this.x-this.r, this.y-this.r, this.r*2, this.r*2);
+        }
     }
     /*distanceFromRectangle(x, y, width, height){ //distance from ball and a rectangle
         let dx = Math.max(Math.abs(this.x - x) - width / 2, 0);
@@ -59,7 +71,7 @@ class Ball{
     distanceFromPoint(x,y){
         return Math.sqrt((this.x-x)*(this.x-x) + (this.y-y)*(this.y-y));
     }
-    dynamicCollision(ball, moveOtherBall){
+    elasticCollision(ball, moveOtherBall){
         let xnormal = (this.x - ball.x)/this.distanceFromPoint(ball.x, ball.y); //vektor normale - ta gleda proti središču collided kroga
         let ynormal = (this.y - ball.y)/this.distanceFromPoint(ball.x, ball.y);
         let xtangent = -ynormal;
@@ -70,11 +82,15 @@ class Ball{
         let skalarNorm1 = xnormal*this.vx + ynormal*this.vy; //skalarni produkt normale in hitrosti žoge
         let skalarNorm2 = xnormal*ball.vx + ynormal*ball.vy;
 
-        //računanje momentuma - enačbe pridobljene iz wikipedije: https://en.wikipedia.org/wiki/Elastic_collision
+        //elastic collision - enačbe pridobljene iz wikipedije: https://en.wikipedia.org/wiki/Elastic_collision
         let v1 = (this.mass - ball.mass)/(this.mass + ball.mass)*skalarNorm1
         +(2*ball.mass)/(this.mass + ball.mass)*skalarNorm2;
         let v2 = (2*this.mass)/(this.mass+ball.mass)*skalarNorm1
         +(ball.mass-this.mass)/(this.mass+ball.mass)*skalarNorm2;
+
+        //inelastic collision - https://en.wikipedia.org/wiki/Inelastic_collision
+        //let v1 = (0.8*(ball.mass*(skalarNorm2-skalarNorm1)+this.mass*skalarNorm1+ball.mass*skalarNorm2))/(this.mass+ball.mass-1);
+        //let v2 = (0.8*(this.mass*(skalarNorm1-skalarNorm2)+this.mass*skalarNorm1+ball.mass*skalarNorm2))/(this.mass+ball.mass-1);
 
         this.vx = skalarTang1 * xtangent + xnormal * v1; //naša hitrost je skalarni produkt novih vektorjev
         this.vy = skalarTang1 * ytangent + ynormal * v1;

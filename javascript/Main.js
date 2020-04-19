@@ -8,7 +8,7 @@ let holes = [];
 let numberOfBalls = 4;
 let mouse = new Point(0,0);
 let mouseDown = false;
-let shootSpeed = 4;
+let shootSpeed = 7;
 let ballRadius = 14;
 let holeRadius = 26; //22
 
@@ -38,14 +38,20 @@ function mainLoop(){
     }
 
     balls.forEach((ball) => {
-        
-        ball.ax = -ball.vx*0.002;				
-		ball.ay = -ball.vy*0.002;	
-        //ball.vy += 0.01; //gravity
+        if(Math.abs(ball.vx) >= 1 || (Math.abs(ball.vy) >= 1)){
+            ball.vx *= 0.999;
+            ball.vy *= 0.999;
+        }
+        else{
+            ball.vx *= 0.99;
+            ball.vy *= 0.99;
+        }
+        if(Math.abs(ball.vx) <= 0.01 || (Math.abs(ball.vy) <= 0.01)){
+            ball.vx = 0;
+            ball.vy = 0;
+        }
         ball.x += ball.vx;
         ball.y += ball.vy;
-        ball.vx += ball.ax;
-        ball.vy += ball.ay;
         //Collision med žogami
         for(let i=0; i<balls.length; i++){
             if(ball.id == i)
@@ -62,7 +68,7 @@ function mainLoop(){
                 balls[i].x += overlap * (ball.x - balls[i].x)/distance; 
                 balls[i].y += overlap * (ball.y - balls[i].y)/distance;
                 
-                ball.dynamicCollision(balls[i], true);
+                ball.elasticCollision(balls[i], true);
             }
         }
         //collision med zidovi in žogami
@@ -85,7 +91,7 @@ function mainLoop(){
                 ball.x -= overlap*(ball.x-tempBall.x)/distance;
                 ball.y -= overlap*(ball.y-tempBall.y)/distance;
 
-                ball.dynamicCollision(tempBall, false);
+                ball.elasticCollision(tempBall, false);
             }
         });
 
@@ -101,12 +107,8 @@ function mainLoop(){
         //walls[i].draw("white", "white");
     }
     balls.forEach((ball) => {
-        if(ball.type == "whiteball")
-            ball.draw("white");
-        else if(ball.type == "blackball")
-            ball.draw("black");
-        else
-            ball.draw("blue");
+        ball.drawImg();
+
         //line to shoot the balls
         if(ball.selected){
             ctx.beginPath();
@@ -165,15 +167,44 @@ window.addEventListener("mouseup", (event) => {
 function initBalls(){
     balls.push(new Ball(200, canvas.height/2, ballRadius, 0, 0, ballID));
     balls[balls.length-1].type = "whiteball"; ballID++;
+    balls[balls.length-1].loadImg("img/Ball-White.png");
     balls.push(new Ball(canvas.width-300, canvas.height/2, ballRadius, 0, 0, ballID));
     balls[balls.length-1].type = "blackball"; ballID++;
-    //3 žoge pod črno
-    balls.push(new Ball(canvas.width-326, canvas.height/2+ballRadius+1, ballRadius, 0, 0, ballID)); ballID++;
-    balls.push(new Ball(canvas.width-326, canvas.height/2-ballRadius-1, ballRadius, 0, 0, ballID)); ballID++;
-    balls.push(new Ball(canvas.width-352, canvas.height/2, ballRadius, 0, 0, ballID)); ballID++;
-    //žoge v vrstici, kjer je črna
-    balls.push(new Ball(canvas.width-300, canvas.height/2-ballRadius*2-2, ballRadius, 0, 0, ballID));
-    balls.push(new Ball(canvas.width-300, canvas.height/2+ballRadius*2+2, ballRadius, 0, 0, ballID));
+    balls[balls.length-1].loadImg("img/H8.png");
+
+    //1. vrstica c trikotniku žog
+    balls.push(new Ball(canvas.width-300-2*28, canvas.height/2, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/A - 1.png");
+    //2. vrstica
+    balls.push(new Ball(canvas.width-300-28, canvas.height/2+ballRadius+4, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/A1.png");
+    balls.push(new Ball(canvas.width-300-28, canvas.height/2-ballRadius-4, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/A1.png");
+    //3. vrstica (brez črne)
+    balls.push(new Ball(canvas.width-300, canvas.height/2-ballRadius*2-8, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/A1.png");
+    balls.push(new Ball(canvas.width-300, canvas.height/2+ballRadius*2+8, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/A1.png");
+    //4.vrstica
+    balls.push(new Ball(canvas.width-300+28, canvas.height/2+ballRadius+4, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/A1.png");
+    balls.push(new Ball(canvas.width-300+28, canvas.height/2-ballRadius-4, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/A1.png");
+    balls.push(new Ball(canvas.width-300+28, canvas.height/2+ballRadius*3+8, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/A1.png");
+    balls.push(new Ball(canvas.width-300+28, canvas.height/2-ballRadius*3-8, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/A1.png");
+    //5.vrstica
+    balls.push(new Ball(canvas.width-300+2*28, canvas.height/2, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/A1.png");
+    balls.push(new Ball(canvas.width-300+2*28, canvas.height/2+ballRadius*2+4, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/A1.png");
+    balls.push(new Ball(canvas.width-300+2*28, canvas.height/2-ballRadius*2-4, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/A1.png");
+    balls.push(new Ball(canvas.width-300+2*28, canvas.height/2+ballRadius*4+8, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/A1.png");
+    balls.push(new Ball(canvas.width-300+2*28, canvas.height/2-ballRadius*4-8, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/A1.png");
 }
 
 function distanceBetweenPoints(x1, y1, x2, y2){
