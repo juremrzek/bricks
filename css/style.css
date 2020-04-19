@@ -7,11 +7,12 @@ html{
 }
 #canvas{
     width: 1200px;
-    height: 800px;
-    /*background: #fed8b1;*/
-    background: black;
+    height: 600px;
+    background: green;
+    background: url("../img/table.png");
+    background-size: 1200px;
+    background-repeat: no-repeat;
     position: relative;
     left: 50%;
     transform: translate(-50%, 0);
-    border: 1px solid white;
 }

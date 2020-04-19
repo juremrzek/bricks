@@ -40,7 +40,10 @@ class Ball{
         this.id = id;
         this.selected = false;
         this.mass = radius*10;
-        this.numberOfBounces = 0;
+        this.type;
+        this.active = true; //if the ball is still in game, status = "active"
+        this.ax = 0;
+        this.ay = 0;
     }
     draw(color){
         ctx.fillStyle = color;
@@ -54,7 +57,6 @@ class Ball{
         return Math.sqrt(dx * dx + dy * dy);
     }*/
     distanceFromPoint(x,y){
-        //console.log(x+ " lčmao "+this.x);
         return Math.sqrt((this.x-x)*(this.x-x) + (this.y-y)*(this.y-y));
     }
     dynamicCollision(ball, moveOtherBall){
@@ -81,8 +83,9 @@ class Ball{
             ball.vx = skalarTang2 * xtangent + xnormal * v2;
             ball.vy = skalarTang2 * ytangent + ynormal * v2;
         }
-        this.numberOfBounces++;
-        console.log(this.numberOfBounces);
+        bounceSound.load();
+        bounceSound.play();
+        //console.log("play");
     }
 }
 class Point{
