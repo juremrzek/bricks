@@ -43,7 +43,7 @@ class Ball{
         this.type;
         this.active = true; //if the ball is still in game, status = "active"
         this.img = new Image();
-
+        this.angle = 0;
     }
     draw(color){
         ctx.fillStyle = color;
@@ -52,9 +52,12 @@ class Ball{
         ctx.fill();
     }
     drawImg(){
-        //this.img.onload = ()=> {
-            ctx.drawImage(this.img, this.x-this.r, this.y-this.r, this.r*2, this.r*2);
-        //}
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+        ctx.translate(-this.x-this.r, -this.y-this.r);
+        ctx.drawImage(this.img, this.x, this.y, this.r*2, this.r*2);
+        ctx.restore();
     }
     loadImg(imgsrc){
         this.imgsrc = imgsrc;
@@ -62,12 +65,8 @@ class Ball{
         this.img.onload = ()=> {
             ctx.drawImage(this.img, this.x-this.r, this.y-this.r, this.r*2, this.r*2);
         }
+        
     }
-    /*distanceFromRectangle(x, y, width, height){ //distance from ball and a rectangle
-        let dx = Math.max(Math.abs(this.x - x) - width / 2, 0);
-        let dy = Math.max(Math.abs(this.y - y) - height / 2, 0);
-        return Math.sqrt(dx * dx + dy * dy);
-    }*/
     distanceFromPoint(x,y){
         return Math.sqrt((this.x-x)*(this.x-x) + (this.y-y)*(this.y-y));
     }
@@ -99,9 +98,10 @@ class Ball{
             ball.vx = skalarTang2 * xtangent + xnormal * v2;
             ball.vy = skalarTang2 * ytangent + ynormal * v2;
         }
-        bounceSound.load();
-        bounceSound.play();
-        //console.log("play");
+        this.angle = Math.atan2(this.vx, this.vy);
+        const newAudio = bounceSound.cloneNode();
+        //bounceSound.play();
+        newAudio.play();
     }
 }
 class Point{

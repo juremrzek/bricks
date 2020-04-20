@@ -39,8 +39,8 @@ function mainLoop(){
 
     balls.forEach((ball) => {
         if(Math.abs(ball.vx) >= 1 || (Math.abs(ball.vy) >= 1)){
-            ball.vx *= 0.999;
-            ball.vy *= 0.999;
+            ball.vx *= 0.998;
+            ball.vy *= 0.998;
         }
         else{
             ball.vx *= 0.99;
@@ -59,7 +59,7 @@ function mainLoop(){
             let distance = ball.distanceFromPoint(balls[i].x, balls[i].y);
             //collision med dvema krogoma
             if(distance <= ball.r+balls[i].r){
-                let overlap = 0.5*(distance - ball.r - balls[i].r);
+                let overlap = (distance - ball.r - balls[i].r);
                 
                 ball.x -= overlap * (ball.x - balls[i].x)/distance; //razstavimo dejanski razmak krogov v x in y koordinato -
                 ball.y -= overlap * (ball.y - balls[i].y)/distance; //npr. če bo x=0.2 bo y=0.8, skupaj bo vedno 1. Potem pomnožimo z
@@ -139,7 +139,7 @@ window.addEventListener("mousedown", (event) => {
     mouse.y = event.y-canvas.getBoundingClientRect().top;
     mouseDown = true;
     balls.forEach((ball) => {
-        if(ball.distanceFromPoint(mouse.x, mouse.y) < ball.r)
+        if(ball.distanceFromPoint(mouse.x, mouse.y) <= ball.r)
             ball.selected = true;
     });
     walls.forEach((wall) => {
@@ -177,32 +177,32 @@ function initBalls(){
     balls[balls.length-1].loadImg("img/A - 1.png");
     //2. vrstica
     balls.push(new Ball(canvas.width-300-28, canvas.height/2+ballRadius+4, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/A1.png");
+    balls[balls.length-1].loadImg("img/B2.png");
     balls.push(new Ball(canvas.width-300-28, canvas.height/2-ballRadius-4, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/A1.png");
+    balls[balls.length-1].loadImg("img/B - 2.png");
     //3. vrstica (brez črne)
     balls.push(new Ball(canvas.width-300, canvas.height/2-ballRadius*2-8, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/A1.png");
+    balls[balls.length-1].loadImg("img/C3.png");
     balls.push(new Ball(canvas.width-300, canvas.height/2+ballRadius*2+8, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/A1.png");
+    balls[balls.length-1].loadImg("img/C - 3.png");
     //4.vrstica
     balls.push(new Ball(canvas.width-300+28, canvas.height/2+ballRadius+4, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/A1.png");
+    balls[balls.length-1].loadImg("img/D4.png");
     balls.push(new Ball(canvas.width-300+28, canvas.height/2-ballRadius-4, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/A1.png");
+    balls[balls.length-1].loadImg("img/D - 4.png");
     balls.push(new Ball(canvas.width-300+28, canvas.height/2+ballRadius*3+8, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/A1.png");
+    balls[balls.length-1].loadImg("img/E5.png");
     balls.push(new Ball(canvas.width-300+28, canvas.height/2-ballRadius*3-8, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/A1.png");
+    balls[balls.length-1].loadImg("img/E - 5.png");
     //5.vrstica
     balls.push(new Ball(canvas.width-300+2*28, canvas.height/2, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/A1.png");
+    balls[balls.length-1].loadImg("img/F6.png");
     balls.push(new Ball(canvas.width-300+2*28, canvas.height/2+ballRadius*2+4, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/A1.png");
+    balls[balls.length-1].loadImg("img/F - 6.png");
     balls.push(new Ball(canvas.width-300+2*28, canvas.height/2-ballRadius*2-4, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/A1.png");
+    balls[balls.length-1].loadImg("img/G7.png");
     balls.push(new Ball(canvas.width-300+2*28, canvas.height/2+ballRadius*4+8, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/A1.png");
+    balls[balls.length-1].loadImg("img/G - 7.png");
     balls.push(new Ball(canvas.width-300+2*28, canvas.height/2-ballRadius*4-8, ballRadius, 0, 0, ballID)); ballID++;
     balls[balls.length-1].loadImg("img/A1.png");
 }
