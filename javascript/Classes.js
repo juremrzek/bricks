@@ -38,7 +38,6 @@ class Ball{
         this.vx = vx;
         this.vy = vy;
         this.id = id;
-        this.selected = false;
         this.mass = radius*1000;
         this.type;
         this.active = true; //if the ball is still in game, status = "active"
