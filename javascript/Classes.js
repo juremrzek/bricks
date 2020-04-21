@@ -148,3 +148,30 @@ class Wall{
         ctx.stroke();
     }
 }
+class Stick{
+    constructor(x, y, angle, width, height){
+        this.x = x;
+        this.y = y;
+        this.angle = angle;
+        this.img = new Image;
+        this.imgsrc;
+        this.width = width;
+        this.height = height;
+        this.distanceFromCenter = balls[0].r+10;
+    }
+    drawImg(){
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+        ctx.translate(-this.x-this.width-this.distanceFromCenter, -this.y-this.height/2);
+        ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+        ctx.restore();
+    }
+    loadImg(imgsrc){
+        this.imgsrc = imgsrc;
+        this.img.src = this.imgsrc;
+        this.img.onload = ()=> {
+            ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+        }
+    }
+}

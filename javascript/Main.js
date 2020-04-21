@@ -8,9 +8,12 @@ let holes = [];
 let numberOfBalls = 4;
 let mouse = new Point(0,0);
 let mouseDown = false;
-let shootSpeed = 7;
+let shootSpeed = 6;
 let ballRadius = 14;
 let holeRadius = 26; //22
+let player1 = "Player 1";
+let player2 = "Player 2";
+let currplayer = player1;
 
 holes.push(new Ball(30, 28, holeRadius, 0, 0, null));
 holes.push(new Ball(1170, 28, holeRadius, 0, 0, null));
@@ -22,6 +25,9 @@ holes.push(new Ball(600, 586, holeRadius, 0, 0, null));
 
 let ballID = 0;
 initBalls();
+let stick = new Stick(balls[0].x, balls[0].y, 0, 642, 40);
+stick.loadImg("img/stick5.png");
+
 let bounceSound = new Audio('sounds/bounce2.wav');
 walls.push(new Wall(12, 12, 12, canvas.height-12, 20));
 walls.push(new Wall(12, canvas.height-12, canvas.width/2-23, canvas.height-12, 20));
@@ -29,6 +35,7 @@ walls.push(new Wall(canvas.width/2+23, canvas.height-12, canvas.width-12, canvas
 walls.push(new Wall(canvas.width-12, canvas.height-12, canvas.width-12, 12, 20));
 walls.push(new Wall(canvas.width-12, 12, canvas.width/2+23, 12, 20));
 walls.push(new Wall(canvas.width/2-23, 12, 12, 12, 20));
+
 mainLoop();
 function mainLoop(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -46,7 +53,7 @@ function mainLoop(){
             ball.vx *= 0.99;
             ball.vy *= 0.99;
         }
-        if(Math.abs(ball.vx) <= 0.01 || (Math.abs(ball.vy) <= 0.01)){
+        if(Math.abs(ball.vx) < 0.008 || (Math.abs(ball.vy) < 0.008)){
             ball.vx = 0;
             ball.vy = 0;
         }
@@ -106,9 +113,12 @@ function mainLoop(){
     for(let i=0; i<walls.length; i++){
         //walls[i].draw("white", "white");
     }
+    let ballsAreStill = false;
     balls.forEach((ball) => {
         ball.drawImg();
-
+        //If all the balls are still, end the round
+        if(ball.vx != 0 || ball.vy != 0)
+            ballsAreStill = true;
         //line to shoot the balls
         if(ball.selected){
             ctx.beginPath();
@@ -118,8 +128,11 @@ function mainLoop(){
             ctx.stroke();
         }
     });
-    for(let i=0; i<holes.length; i++){
-        //holes[i].draw("green");
+    if(!ballsAreStill){
+        stick.x = balls[0].x;
+        stick.y = balls[0].y;
+        stick.angle = getAngle(balls[0], mouse);
+        stick.drawImg();
     }
     requestAnimationFrame(mainLoop);
 }
@@ -138,75 +151,89 @@ window.addEventListener("mousedown", (event) => {
     mouse.x = event.x-canvas.getBoundingClientRect().left;
     mouse.y = event.y-canvas.getBoundingClientRect().top;
     mouseDown = true;
-    balls.forEach((ball) => {
-        if(ball.distanceFromPoint(mouse.x, mouse.y) <= ball.r)
-            ball.selected = true;
-    });
-    walls.forEach((wall) => {
-        if(distanceBetweenPoints(mouse.x, mouse.y, wall.startx, wall.starty) <= wall.r)
-            wall.startSelected = true;
-        if(distanceBetweenPoints(mouse.x, mouse.y, wall.endx, wall.endy) <= wall.r)
-            wall.endSelected = true;
-    });
+    if(balls[0].distanceFromPoint(mouse.x, mouse.y) <= balls[0].r)
+        balls[0].selected = true;
 });
 window.addEventListener("mouseup", (event) => {
     mouseDown = false;
-    balls.forEach((ball) => {
-        if(ball.selected){
-            ball.vx = (ball.x - mouse.x)/distanceBetweenPoints(ball.x, ball.y, mouse.x, mouse.y)*shootSpeed;
-            ball.vy = (ball.y - mouse.y)/distanceBetweenPoints(ball.x, ball.y, mouse.x, mouse.y)*shootSpeed;
-        }
-        ball.selected = false;
-    });
-    walls.forEach((wall) => {
-        wall.startSelected = false;
-        wall.endSelected = false;
-    });
+    if(balls[0].selected){
+        balls[0].vx = (mouse.x - balls[0].x)/distanceBetweenPoints(balls[0].x, balls[0].y, mouse.x, mouse.y)*shootSpeed;
+        balls[0].vy = (mouse.y - balls[0].y)/distanceBetweenPoints(balls[0].x, balls[0].y, mouse.x, mouse.y)*shootSpeed;
+    }
+    balls[0].selected = false;
 });
 
 function initBalls(){
     balls.push(new Ball(200, canvas.height/2, ballRadius, 0, 0, ballID));
     balls[balls.length-1].type = "whiteball"; ballID++;
-    balls[balls.length-1].loadImg("img/Ball-White.png");
+    balls[balls.length-1].loadImg("img/ball_16.png");
     balls.push(new Ball(canvas.width-300, canvas.height/2, ballRadius, 0, 0, ballID));
     balls[balls.length-1].type = "blackball"; ballID++;
-    balls[balls.length-1].loadImg("img/H8.png");
+    balls[balls.length-1].loadImg("img/ball_8.png");
 
     //1. vrstica c trikotniku žog
-    balls.push(new Ball(canvas.width-300-2*28, canvas.height/2, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/A - 1.png");
+    balls.push(new Ball(canvas.width-300-2*26, canvas.height/2, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/ball_1.png");
     //2. vrstica
-    balls.push(new Ball(canvas.width-300-28, canvas.height/2+ballRadius+4, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/B2.png");
-    balls.push(new Ball(canvas.width-300-28, canvas.height/2-ballRadius-4, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/B - 2.png");
-    //3. vrstica (brez črne)
+    balls.push(new Ball(canvas.width-300-26, canvas.height/2+ballRadius+4, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/ball_9.png");
+    balls.push(new Ball(canvas.width-300-26, canvas.height/2-ballRadius-4, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/ball_2.png");
+    //3. vrstica (kjer je črna)
     balls.push(new Ball(canvas.width-300, canvas.height/2-ballRadius*2-8, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/C3.png");
+    balls[balls.length-1].loadImg("img/ball_10.png");
     balls.push(new Ball(canvas.width-300, canvas.height/2+ballRadius*2+8, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/C - 3.png");
+    balls[balls.length-1].loadImg("img/ball_3.png");
     //4.vrstica
-    balls.push(new Ball(canvas.width-300+28, canvas.height/2+ballRadius+4, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/D4.png");
-    balls.push(new Ball(canvas.width-300+28, canvas.height/2-ballRadius-4, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/D - 4.png");
-    balls.push(new Ball(canvas.width-300+28, canvas.height/2+ballRadius*3+8, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/E5.png");
-    balls.push(new Ball(canvas.width-300+28, canvas.height/2-ballRadius*3-8, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/E - 5.png");
+    balls.push(new Ball(canvas.width-300+26, canvas.height/2+ballRadius+4, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/ball_11.png");
+    balls.push(new Ball(canvas.width-300+26, canvas.height/2-ballRadius-4, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/ball_7.png");
+    balls.push(new Ball(canvas.width-300+26, canvas.height/2+ballRadius*3+8, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/ball_13.png");
+    balls.push(new Ball(canvas.width-300+26, canvas.height/2-ballRadius*3-8, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/ball_4.png");
     //5.vrstica
-    balls.push(new Ball(canvas.width-300+2*28, canvas.height/2, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/F6.png");
-    balls.push(new Ball(canvas.width-300+2*28, canvas.height/2+ballRadius*2+4, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/F - 6.png");
-    balls.push(new Ball(canvas.width-300+2*28, canvas.height/2-ballRadius*2-4, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/G7.png");
-    balls.push(new Ball(canvas.width-300+2*28, canvas.height/2+ballRadius*4+8, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/G - 7.png");
-    balls.push(new Ball(canvas.width-300+2*28, canvas.height/2-ballRadius*4-8, ballRadius, 0, 0, ballID)); ballID++;
-    balls[balls.length-1].loadImg("img/A1.png");
+    balls.push(new Ball(canvas.width-300+2*26, canvas.height/2, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/ball_5.png");
+    balls.push(new Ball(canvas.width-300+2*26, canvas.height/2+ballRadius*2+4, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/ball_13.png");
+    balls.push(new Ball(canvas.width-300+2*26, canvas.height/2-ballRadius*2-4, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/ball_15.png");
+    balls.push(new Ball(canvas.width-300+2*26, canvas.height/2+ballRadius*4+8, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/ball_12.png");
+    balls.push(new Ball(canvas.width-300+2*26, canvas.height/2-ballRadius*4-8, ballRadius, 0, 0, ballID)); ballID++;
+    balls[balls.length-1].loadImg("img/ball_6.png");
 }
 
 function distanceBetweenPoints(x1, y1, x2, y2){
     return Math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+}
+//Gets an angle between a vector and y-axis
+function getAngle(p1, p2){
+    //Vector between points
+    let pointVectorx = p2.x-p1.x;
+    let pointVectory = p2.y-p1.y;
+    
+    //Vector in y-axis
+    let axisVectorx = p2.x - p1.x;
+    let axisVectory = 0;
+
+    ctx.beginPath();
+    ctx.strokeStyle = "white";
+    ctx.beginPath();
+    ctx.moveTo(balls[0].x, balls[0].y);
+    ctx.lineTo(pointVectorx+balls[0].x, pointVectory+balls[0].y);
+    ctx.stroke();
+
+    let dotProduct = pointVectorx*axisVectorx + pointVectory*axisVectory;
+    let lengthProduct = distanceBetweenPoints(p2.x, p2.y, p1.x, p1.y) * (p2.x-p1.x);
+    if(p2.y < p1.y){
+        if(lengthProduct == 0)
+            return 3*Math.PI/2;
+        return -Math.acos(dotProduct/lengthProduct);
+    }
+    if(lengthProduct == 0)
+        return Math.PI/2;
+    return Math.acos(dotProduct/lengthProduct);
 }
