@@ -38,7 +38,7 @@ class Ball{
         this.vx = vx;
         this.vy = vy;
         this.id = id;
-        this.mass = radius*1000;
+        this.mass = this.r*10;
         this.type;
         this.active = true; //if the ball is still in game, status = "active"
         this.img = new Image();
@@ -148,12 +148,12 @@ class Wall{
     }
 }
 class Stick{
-    constructor(x, y, angle, width, height){
+    constructor(x, y, angle, width, height, imgsrc){
         this.x = x;
         this.y = y;
         this.angle = angle;
-        this.img = new Image;
-        this.imgsrc;
+        this.img = new Image();
+        this.img.src = imgsrc;
         this.width = width;
         this.height = height;
         this.distanceFromCenter = balls[0].r+10;
@@ -166,11 +166,16 @@ class Stick{
         ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
         ctx.restore();
     }
-    loadImg(imgsrc){
-        this.imgsrc = imgsrc;
-        this.img.src = this.imgsrc;
+    loadImg(){
         this.img.onload = ()=> {
             ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
         }
+    }
+}
+class Player{
+    constructor(name, stick){
+        this.name = name;
+        this.stick = stick;
+        this.balls = [];
     }
 }

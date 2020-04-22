@@ -8,9 +8,24 @@
     <link rel='icon' href='favicon.ico' type='image/x-icon'/ >
 </head>
 <body>
-    <canvas id="canvas"></canvas>
+    <canvas id="canvas" class="middle"></canvas>
+    <div id="stats" class="middle">
+        <img src="img/options.png" width="40" height="40" id="optionImg"></img>
+        <div id="upperStats">
+            <div id="player1Name">Player 1</div>
+            <div id="logoDiv">POOL</div>
+            <div id="player2Name">Player 2</div>
+        </div>
+        <div id="sticksDiv">
+            <img src="img/stick1.png" width="312" height="20" id="stick1"></img>
+            <img src="img/stick2.png" width="312" height="20" id="stick2"></img>
+        </div>
+        <div id="ballsDiv">
+            <div id="ballsPlayer1"></div>
+            <div id="ballsPlayer2"></div>
+        </div>
+    </div>
     <script src="javascript/Classes.js"></script>
     <script src="javascript/Main.js"></script>
-    <div id="stats"></div>
 </body>
 </html>

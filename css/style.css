@@ -1,5 +1,9 @@
 *{
     margin: 0;
+    -webkit-user-select: none; /* Safari */        
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+/Edge */
+    user-select: none; /* Standard */
 }
 html{
     /*background: #fdcb7e;*/
@@ -8,15 +12,104 @@ html{
 #canvas{
     width: 1200px;
     height: 600px;
-    background: green;
+    background: #005923;
     background: url("../img/table.png");
     background-size: 1200px;
     background-repeat: no-repeat;
+}
+#stats{
+    width: 1400px;
+    height: 200px;
+    background: #005923;
+    /*display: flex;
+    justify-content: center;*/
+    font-family: Normal_font;
+    font-size: 48px;
+    margin-top: 5px;
+}
+#upperStats{
+    width: 1400px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    padding-top: 2px;
+}
+#sticksDiv{
+    width: 1400px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+}
+#stick1{
+    position: static;
+    transform: translate(-56%, 0);
+    margin-right: 5px;
+    margin-top: -5px;
+}
+#stick2{
+    position: static;
+    margin-right: 5px;
+    margin-top: -5px;
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1) translate(-60%, 0);
+    /*transform: ;*/
+}
+#player1Name{
+    width: 350px;
+    height: 50px;
+    background: gray;
+    margin-right: 50px;
+    border-radius: 20px;
+    padding-left: 10px;
+    padding-top: 5px;
+}
+#player2Name{
+    width: 350px;
+    height: 50px;
+    background: gray;
+    margin-left: 50px;
+    border-radius: 20px;
+    padding-right: 10px;
+    padding-top: 5px;
+    text-align: right;
+}
+.middle{
     position: relative;
     left: 50%;
     transform: translate(-50%, 0);
 }
-#stats{
-    height: 200px;
-    background: blue;
+#logoDiv{
+    width: 205px;
+    height: 80px;
+    /*background: green;*/
+    font-family: Arial;
+    font-family: Pool_font;
+    font-size: 72px;
+    margin-top: -8px;
+}
+@font-face{
+    font-family: "Pool_font";
+    src: url("../fonts/pool_font.ttf") format("truetype");
+}
+@font-face {
+    font-family: "Normal_font";
+    src: url("../fonts/normal_font.otf") format("opentype");
+}
+#optionImg{
+    position:absolute;
+    right: 100%;
+    transform: translate(100%, 0);
+    margin-right: -5px;
+    margin-top: 5px;
+}
+#ballsDiv{
+    height: 40px;
+    display: flex;
+    justify-content: space-around;
+}
+#ballsPlayer1{
+    width: 300px;
+}
+#ballsPlayer2{
+    width: 300px;
 }
