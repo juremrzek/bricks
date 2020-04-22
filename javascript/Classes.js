@@ -40,7 +40,7 @@ class Ball{
         this.id = id;
         this.mass = this.r*10;
         this.type;
-        this.active = true; //if the ball is still in game, status = "active"
+        this.active = true;
         this.img = new Image();
         this.angle = 0;
     }
