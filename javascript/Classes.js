@@ -166,16 +166,13 @@ class Stick{
         ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
         ctx.restore();
     }
-    loadImg(){
-        this.img.onload = ()=> {
-            ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
-        }
-    }
+    
 }
 class Player{
     constructor(name, stick){
         this.name = name;
         this.stick = stick;
         this.balls = [];
+        
     }
 }

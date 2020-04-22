@@ -12,6 +12,7 @@ let maxShotSpeed = 10;
 let ballRadius = 14;
 let holeRadius = 26; //22
 let ballID = 0;
+let gameState = "playing";
 initBalls();
 let player1 = new Player("Player 1", 2);
 let player2 = new Player("Player 2", 8);
@@ -35,8 +36,12 @@ holes.push(new Ball(30, 572, holeRadius, 0, 0, null));
 holes.push(new Ball(1170, 572, holeRadius, 0, 0, null));
 holes.push(new Ball(600, 586, holeRadius, 0, 0, null));
 
+tempWhiteBall = new Ball(mouse.x, mouse.y, balls[0].r, 0, 0, 0);
+tempWhiteBall.loadImg("img/ball_00.png");
+tempWhiteBall.type = "white";
+
 let stick = new Stick(balls[0].x, balls[0].y, 0, 642, 40, "img/stick"+currPlayer.stick+".png");
-stick.loadImg();
+//stick.loadImg();
 
 let bounceSound = new Audio('sounds/bounce2.wav');
 walls.push(new Wall(12, 12, 12, canvas.height-12, 20));
@@ -49,37 +54,90 @@ walls.push(new Wall(canvas.width/2-23, 12, 12, 12, 20));
 const ballsDiv1 = document.getElementById("ballsPlayer1");
 const ballsDiv2 = document.getElementById("ballsPlayer2");
 updateScore();
+sweetAlert();
+function sweetAlert(){
+    Swal.mixin({
+        input: 'text',
+        confirmButtonText: 'Next &rarr;',
+        showCancelButton: false,
+        progressSteps: ['1', '2']
+    }).queue([
+        {
+            title: 'Player 1',
+            text: 'Name the first player'
+        },
+        {
+            title: 'Player 2',
+            text: 'Name the second player'
+        }
+    ]).then((result) => {
+        if(result.value) {
+            player1.name = result.value[0];
+            player2.name = result.value[1];
+            if(player1.name == "" || player1.name.length > 15)
+                player1.name = "Player 1";
+            if(player2.name == "" || player2.name.length > 15)
+                player2.name = "Player 2";
+            player1Div.innerHTML = player1.name;
+            player2Div.innerHTML = player2.name;
+            mainLoop();
+        }
+        else{
+            sweetAlert();
+        }
+    });
+}
 
-mainLoop();
+//mainLoop();
 function mainLoop(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     balls = balls.filter((p) => p.active);
     for(let i=0; i<balls.length; i++){
         balls[i].id = i;
     }
-    if(mouseDown){
-        charge+=0.1;
-        if(charge>maxShotSpeed)
-            charge = maxShotSpeed;
-        stick.distanceFromCenter = charge*10+balls[0].r+10;
-    }
-    else if(!ballsAreMoving && charge > 0){
-        balls[0].vx = (mouse.x - balls[0].x)/distanceBetweenPoints(balls[0].x, balls[0].y, mouse.x, mouse.y)*charge;
-        balls[0].vy = (mouse.y - balls[0].y)/distanceBetweenPoints(balls[0].x, balls[0].y, mouse.x, mouse.y)*charge;
-        charge = 0;
-        stick.distanceFromCenter = balls[0].r+10;
-        if(currPlayer == player1){
-            currPlayer = player2;
-            waitingPlayer = player1;
+    if(!ballsAreMoving){
+        if(gameState == "whiteBall"){
+
+            ctx.fillStyle = "white";
+            ctx.globalAlpha = 0.5;
+            ctx.fillRect(50, 50, canvas.width-100, canvas.height-100);
+            ctx.globalAlpha = 1.0;
+
+            tempWhiteBall.x = mouse.x;
+            tempWhiteBall.y = mouse.y;
+            tempWhiteBall.drawImg();
+
+            ctx.fillStyle = "black";
+            ctx.font = "60px Normal_font";
+            ctx.fillText("Place the white ball anywhere", canvas.width/2-250, 100);
         }
-        else{
-            currPlayer = player1;
-            waitingPlayer = player2;
+        else if(gameState == "gameOver"){
+            if(balls.length == 1)
+                console.log(waitingPlayer.name+" has won");
+            else
+                console.log(currPlayer.name+" has won");
         }
-        stick.img.src = "img/stick"+currPlayer.stick+".png";
-    }
-    else{
-        charge = 0;
+        else if(mouseDown){
+            charge+=0.1;
+            if(charge>maxShotSpeed)
+                charge = maxShotSpeed;
+            stick.distanceFromCenter = charge*10+balls[0].r+10;
+        }
+        else if(charge > 0){
+            balls[0].vx = (mouse.x - balls[0].x)/distanceBetweenPoints(balls[0].x, balls[0].y, mouse.x, mouse.y)*charge;
+            balls[0].vy = (mouse.y - balls[0].y)/distanceBetweenPoints(balls[0].x, balls[0].y, mouse.x, mouse.y)*charge;
+            charge = 0;
+            stick.distanceFromCenter = balls[0].r+10;
+            if(currPlayer == player1){
+                currPlayer = player2;
+                waitingPlayer = player1;
+            }
+            else{
+                currPlayer = player1;
+                waitingPlayer = player2;
+            }
+            stick.img.src = "img/stick"+currPlayer.stick+".png";
+        }
     }
 
 
@@ -143,20 +201,21 @@ function mainLoop(){
 
         for(let i=0; i<holes.length; i++){
             let distance = ball.distanceFromPoint(holes[i].x, holes[i].y);
-            if(distance <= ball.r+holes[i].r){ //lmao
-                if(ball.type == "stripe")
-                    player1.balls.push(ball);
-                else if(ball.type == "solid")
-                    player2.balls.push(ball);
-                //console.log(ball.type, ball.imgsrc);
+            if(distance <= ball.r+holes[i].r){
+                switch(ball.type){
+                    case "black": gameState = "gameOver";
+                    break;
+                    case "white": gameState = "whiteBall";
+                    break;
+                    case "stripe": player1.balls.push(ball);
+                    break;
+                    case "solid": player2.balls.push(ball);
+                }
                 updateScore();
                 ball.active = false;
             }
         }
     });
-    for(let i=0; i<walls.length; i++){
-        //walls[i].draw("white", "white");
-    }
     ballsAreMoving = false;
     balls.forEach((ball) => {
         ball.drawImg();
@@ -172,7 +231,7 @@ function mainLoop(){
             ctx.stroke();
         }
     });
-    if(!ballsAreMoving){
+    if(!ballsAreMoving && gameState != "whiteBall" && gameState != "gameOver"){
         stick.x = balls[0].x;
         stick.y = balls[0].y;
         stick.angle = getAngle(balls[0], mouse);
@@ -198,8 +257,22 @@ window.addEventListener("mousedown", (event) => {
 });
 window.addEventListener("mouseup", (event) => {
     mouseDown = false;
-    //balls[0].vx = (mouse.x - balls[0].x)/distanceBetweenPoints(balls[0].x, balls[0].y, mouse.x, mouse.y)*shootSpeed;
-    //balls[0].vy = (mouse.y - balls[0].y)/distanceBetweenPoints(balls[0].x, balls[0].y, mouse.x, mouse.y)*shootSpeed;
+    if(gameState == "whiteBall"){
+        let touchingAnyBall = false;
+        //let canRelease = false;
+        balls.forEach((ball) => {
+            if(ball.distanceFromPoint(mouse.x, mouse.y) < ball.r*2)
+                touchingAnyBall = true;
+        });
+        if (!touchingAnyBall && mouse.x > 60 && mouse.x < canvas.width-60 && mouse.y > 60 && mouse.y < canvas.height-60){
+            let whiteBall = new Ball(tempWhiteBall.x, tempWhiteBall.y, tempWhiteBall.r, 0, 0, 0);
+            whiteBall.loadImg("img/ball_00.png");
+            whiteBall.type = "white";
+            balls.unshift(whiteBall);
+            gameState = "playing";
+        }
+        
+    }
 });
 
 function initBalls(){
@@ -304,8 +377,11 @@ function updateScore(){
             img.src = player2.balls[i].img.src;
         }
         else{
-            img.src = "img/ball_empty.png"
+            img.src = "img/ball_empty.png";
         }
         ballsDiv2.appendChild(img);
     }
+}
+function moveWhiteBall(){
+    
 }
