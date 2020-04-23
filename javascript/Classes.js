@@ -173,6 +173,6 @@ class Player{
         this.name = name;
         this.stick = stick;
         this.balls = [];
-        
+        this.type;
     }
 }

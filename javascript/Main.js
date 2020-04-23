@@ -21,6 +21,7 @@ let waitingPlayer = player2;
 let charge = 0;
 let ballsAreMoving = false;
 let gameOver = false;
+let isFirstMove = true;
 
 const player1Div = document.getElementById("player1Name");
 const player2Div = document.getElementById("player2Name");
@@ -96,6 +97,7 @@ function mainLoop(){
     for(let i=0; i<balls.length; i++){
         balls[i].id = i;
     }
+    let distance = distanceBetweenPoints(balls[0].x, balls[0].y, mouse.x, mouse.y);
     if(!ballsAreMoving){
         if(gameState == "whiteBall"){
 
@@ -119,15 +121,15 @@ function mainLoop(){
                 gameOverSweetAlert(currPlayer.name);
             gameOver = true;
         }
-        else if(mouseDown){
+        else if(mouseDown && distance != 0){
             charge+=0.1;
             if(charge>maxShotSpeed)
                 charge = maxShotSpeed;
             stick.distanceFromCenter = charge*10+balls[0].r+10;
         }
         else if(charge > 0){
-            balls[0].vx = (mouse.x - balls[0].x)/distanceBetweenPoints(balls[0].x, balls[0].y, mouse.x, mouse.y)*charge;
-            balls[0].vy = (mouse.y - balls[0].y)/distanceBetweenPoints(balls[0].x, balls[0].y, mouse.x, mouse.y)*charge;
+            balls[0].vx = (mouse.x - balls[0].x)/distance*charge;
+            balls[0].vy = (mouse.y - balls[0].y)/distance*charge;
             charge = 0;
             stick.distanceFromCenter = balls[0].r+10;
             if(currPlayer == player1){
@@ -152,10 +154,10 @@ function mainLoop(){
             ball.vx *= 0.992;
             ball.vy *= 0.992;
         }
-        if(Math.abs(ball.vx) < 0.008 || (Math.abs(ball.vy) < 0.008)){
+        if(Math.abs(ball.vx) < 0.008)
             ball.vx = 0;
+        if(Math.abs(ball.vy) < 0.008)
             ball.vy = 0;
-        }
         ball.x += ball.vx;
         ball.y += ball.vy;
         //Collision med žogami
@@ -204,7 +206,7 @@ function mainLoop(){
         for(let i=0; i<holes.length; i++){
             let distance = ball.distanceFromPoint(holes[i].x, holes[i].y);
             if(distance <= ball.r+holes[i].r){
-                switch(ball.type){
+                /*switch(ball.type){
                     case "black": gameState = "gameOver";
                     break;
                     case "white": gameState = "whiteBall";
@@ -212,6 +214,34 @@ function mainLoop(){
                     case "stripe": player1.balls.push(ball);
                     break;
                     case "solid": player2.balls.push(ball);
+                }*/
+                if(ball.type != "white" && ball.type != "black" && isFirstMove){
+                    player1.type = ball.type;
+                    if(player1.type == "solid")
+                        player2.type = "stripe";
+                    else if(player1.type == "stripe")
+                        player2.type = "solid";
+                    else
+                        console.log(player1.type);
+                    isFirstMove = false;
+                }
+                if(ball.type == "black"){
+                    gameState = "gameOver";
+                }
+                else if(ball.type == "white"){
+                    gameState = "whiteBall"
+                }
+                else if(ball.type == "stripe"){
+                    if(player1.type == "stripe")
+                        player1.balls.push(ball);
+                    else
+                        player2.balls.push(ball);
+                }
+                else if(ball.type == "solid"){
+                    if(player1.type == "solid")
+                        player1.balls.push(ball);
+                    else
+                        player2.balls.push(ball);
                 }
                 updateScore();
                 ball.active = false;
