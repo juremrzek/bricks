@@ -216,11 +216,11 @@ function mainLoop(){
                     case "solid": player2.balls.push(ball);
                 }*/
                 if(ball.type != "white" && ball.type != "black" && isFirstMove){
-                    player1.type = ball.type;
-                    if(player1.type == "solid")
-                        player2.type = "stripe";
-                    else if(player1.type == "stripe")
-                        player2.type = "solid";
+                    waitingPlayer.type = ball.type;
+                    if(waitingPlayer.type == "solid")
+                        currPlayer.type = "stripe";
+                    else if(waitingPlayer.type == "stripe")
+                        currPlayer.type = "solid";
                     else
                         console.log(player1.type);
                     isFirstMove = false;
