@@ -52,7 +52,8 @@ walls.push(new Wall(canvas.width/2+23, canvas.height-12, canvas.width-12, canvas
 walls.push(new Wall(canvas.width-12, canvas.height-12, canvas.width-12, 12, 20));
 walls.push(new Wall(canvas.width-12, 12, canvas.width/2+23, 12, 20));
 walls.push(new Wall(canvas.width/2-23, 12, 12, 12, 20));
-
+const currPlayerDiv1 = document.getElementById("currPlayer1");
+const currPlayerDiv2 = document.getElementById("currPlayer2");
 const ballsDiv1 = document.getElementById("ballsPlayer1");
 const ballsDiv2 = document.getElementById("ballsPlayer2");
 updateScore();
@@ -99,6 +100,27 @@ function mainLoop(){
     }
     let distance = distanceBetweenPoints(balls[0].x, balls[0].y, mouse.x, mouse.y);
     if(!ballsAreMoving){
+        if(currPlayer.type){
+            currPlayerDiv1.innerHTML = player1.type;
+            currPlayerDiv2.innerHTML = player2.type;
+            if(currPlayer == player1){
+                currPlayerDiv1.innerHTML +=" - playing";
+            }
+            else if(currPlayer == player2){
+                currPlayerDiv2.innerHTML += " - playing";
+            }
+        }
+        else{
+            if(currPlayer == player1){
+                currPlayerDiv1.innerHTML = "Playing";
+                currPlayerDiv2.innerHTML = "";
+
+            }
+            else if(currPlayer == player2){
+                currPlayerDiv1.innerHTML = "";
+                currPlayerDiv2.innerHTML = "Playing";
+            }
+        }
         if(gameState == "whiteBall"){
 
             ctx.fillStyle = "white";
@@ -220,7 +242,7 @@ function mainLoop(){
                     if(waitingPlayer.type == "solid")
                         currPlayer.type = "stripe";
                     else if(waitingPlayer.type == "stripe")
-                        currPlayer.type = "solid";
+                        currPlayer.type = "solid"; 
                     else
                         console.log(player1.type);
                     isFirstMove = false;

@@ -113,3 +113,21 @@ html{
 #ballsPlayer2{
     width: 300px;
 }
+#currPlayerDiv{
+    height: 75px;
+    padding-top: 10px;
+    font-family: Normal_font;
+    font-size: 60px;
+    display:flex;
+    justify-content: space-around;
+}
+#currPlayer1{
+    width: 300px;
+    height: 65px;
+    text-align: center;
+}
+#currPlayer2{
+    width: 300px;
+    height: 65px;
+    text-align: center;
+}
