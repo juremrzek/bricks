@@ -20,6 +20,7 @@ let currPlayer = player1
 let waitingPlayer = player2;
 let charge = 0;
 let ballsAreMoving = false;
+let gameOver = false;
 
 const player1Div = document.getElementById("player1Name");
 const player2Div = document.getElementById("player2Name");
@@ -54,8 +55,8 @@ walls.push(new Wall(canvas.width/2-23, 12, 12, 12, 20));
 const ballsDiv1 = document.getElementById("ballsPlayer1");
 const ballsDiv2 = document.getElementById("ballsPlayer2");
 updateScore();
-sweetAlert();
-function sweetAlert(){
+introSweetAlert();
+function introSweetAlert(){
     Swal.mixin({
         input: 'text',
         confirmButtonText: 'Next &rarr;',
@@ -83,7 +84,7 @@ function sweetAlert(){
             mainLoop();
         }
         else{
-            sweetAlert();
+            introSweetAlert();
         }
     });
 }
@@ -113,9 +114,10 @@ function mainLoop(){
         }
         else if(gameState == "gameOver"){
             if(balls.length == 1)
-                console.log(waitingPlayer.name+" has won");
+                gameOverSweetAlert(waitingPlayer.name);
             else
-                console.log(currPlayer.name+" has won");
+                gameOverSweetAlert(currPlayer.name);
+            gameOver = true;
         }
         else if(mouseDown){
             charge+=0.1;
@@ -237,7 +239,8 @@ function mainLoop(){
         stick.angle = getAngle(balls[0], mouse);
         stick.drawImg();
     }
-    requestAnimationFrame(mainLoop);
+    if(!gameOver)
+        requestAnimationFrame(mainLoop);
 }
 
 window.addEventListener("keydown", (event) => {
@@ -382,6 +385,15 @@ function updateScore(){
         ballsDiv2.appendChild(img);
     }
 }
-function moveWhiteBall(){
-    
+function gameOverSweetAlert(player){
+    Swal.fire({
+        title: player+" wins!",
+        confirmButtonText: 'Play again',
+        onClose: () => {
+            location.reload();
+        },
+        showClass: {
+          popup: 'animated fadeInDown faster'
+        },
+      })
 }
